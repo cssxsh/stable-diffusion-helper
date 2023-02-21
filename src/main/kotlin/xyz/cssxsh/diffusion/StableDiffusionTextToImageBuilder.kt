@@ -37,17 +37,29 @@ public class StableDiffusionTextToImageBuilder {
 
     // endregion
 
+    /**
+     * Height
+     */
     @StableDiffusionDSL
-    public var height: Int = 512
+    public var height: Int = 540
 
+    /**
+     * Width
+     */
     @StableDiffusionDSL
-    public var width: Int = 512
+    public var width: Int = 360
 
+    /**
+     * Styles
+     */
     @StableDiffusionDSL
     public var styles: List<String> = listOf("anime")
 
     // region Sampling
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var samplerIndex: String = "Euler"
 
@@ -69,18 +81,37 @@ public class StableDiffusionTextToImageBuilder {
      * Sampling steps
      */
     @StableDiffusionDSL
-    public var steps: Int = 50
+    public var steps: Int = 32
+
+    /**
+     * Sampling steps
+     */
+    @StableDiffusionDSL
+    public fun steps(value: Int?) {
+        steps = value ?: return
+    }
 
     // endregion
 
+    /**
+     * CFG Scale
+     */
     @StableDiffusionDSL
     public var cfgScale: Double = 7.0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var firstPhaseWidth: Int = 0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var firstPhaseHeight: Int = 0
+
+    // region Batch
 
     /**
      * Batch size
@@ -88,8 +119,13 @@ public class StableDiffusionTextToImageBuilder {
     @StableDiffusionDSL
     public var batchSize: Int = 1
 
+    /**
+     * Batch count
+     */
     @StableDiffusionDSL
     public var nIter: Int = 1
+
+    // endregion
 
     /**
      * Restore faces
@@ -103,26 +139,47 @@ public class StableDiffusionTextToImageBuilder {
     @StableDiffusionDSL
     public var tiling: Boolean = false
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var eta: Double = 0.0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var sChurn: Double = 0.0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var sTMax: Double = 0.0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var sTMin: Double = 0.0
 
+    /**
+     * TODO: docs
+     */
     @StableDiffusionDSL
     public var sNoise: Double = 1.0
 
     // region Script
 
+    /**
+     * Script
+     */
     @StableDiffusionDSL
     public var scriptName: String = "None"
 
+    /**
+     * Script
+     */
     @StableDiffusionDSL
     public var scriptArgs: List<String> = emptyList()
 
@@ -204,9 +261,11 @@ public class StableDiffusionTextToImageBuilder {
      * Denoising strength
      */
     @StableDiffusionDSL
-    public var denoisingStrength: Double = 0.0
+    public var denoisingStrength: Double = 0.7
 
     // endregion
+
+    public val raw: MutableMap<String, JsonElement> = HashMap()
 
     @PublishedApi
     internal fun JsonObjectBuilder.push() {
@@ -235,19 +294,18 @@ public class StableDiffusionTextToImageBuilder {
 
         put("eta", eta)
 
-        put("firstphase_width", firstPhaseWidth)
-        put("firstphase_height", firstPhaseHeight)
+//        put("firstphase_width", firstPhaseWidth)
+//        put("firstphase_height", firstPhaseHeight)
 
-
-        put("s_churn", sChurn)
-        put("s_tmax", sTMax)
-        put("s_tmin", sTMin)
-        put("s_noise", sNoise)
+//        put("s_churn", sChurn)
+//        put("s_tmax", sTMax)
+//        put("s_tmin", sTMin)
+//        put("s_noise", sNoise)
 
 //        putJsonObject("override_settings") {}
 //        put("override_settings_restore_afterwards", true)
 
-        put("sampler_index", samplerIndex)
+//        put("sampler_index", samplerIndex)
         put("sampler_name", samplerName)
 
         if (enableHR) {
@@ -257,13 +315,17 @@ public class StableDiffusionTextToImageBuilder {
             put("hr_upscaler", hrUpscaler)
 
             put("hr_scale", hrScale)
-            put("hr_resize_x", hrResizeX)
-            put("hr_resize_y", hrResizeY)
+//            put("hr_resize_x", hrResizeX)
+//            put("hr_resize_y", hrResizeY)
         }
 
         if (scriptName.isNotEmpty() && scriptName != "None") {
             put("script_name", scriptName)
             putJsonArray("script_args") { for (style in scriptArgs) add(style) }
+        }
+
+        for ((key, value) in raw) {
+            put(key, value)
         }
     }
 
