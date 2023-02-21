@@ -1,7 +1,8 @@
 package xyz.cssxsh.mirai.diffusion
 
+import kotlinx.coroutines.*
 import net.mamoe.mirai.console.plugin.jvm.*
-import net.mamoe.mirai.utils.*
+import net.mamoe.mirai.event.*
 
 public object StableDiffusionHelper : KotlinPlugin(
     JvmPluginDescription(
@@ -13,6 +14,13 @@ public object StableDiffusionHelper : KotlinPlugin(
     }
 ) {
     override fun onEnable() {
-        logger.info { "Plugin loaded" }
+        StableDiffusionConfig.reload()
+        StableDiffusionListener.configFolder = configFolder
+        StableDiffusionListener.dataFolder = dataFolder
+        StableDiffusionListener.registerTo(globalEventChannel())
+    }
+
+    override fun onDisable() {
+        StableDiffusionListener.cancel()
     }
 }
