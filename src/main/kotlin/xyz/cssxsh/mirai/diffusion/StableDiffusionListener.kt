@@ -3,6 +3,9 @@ package xyz.cssxsh.mirai.diffusion
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
+import net.mamoe.mirai.console.command.CommandSender.Companion.toCommandSender
+import net.mamoe.mirai.console.permission.*
+import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.event.*
 import net.mamoe.mirai.event.events.*
@@ -21,10 +24,22 @@ public object StableDiffusionListener : SimpleListenerHost() {
     internal var client: StableDiffusionClient = StableDiffusionClient(config = StableDiffusionConfig)
 
     @PublishedApi
-    internal var configFolder: File = File(".")
+    internal val configFolder: File by lazy {
+        try {
+            StableDiffusionHelper.configFolder
+        } catch (_: Exception) {
+            File("out")
+        }
+    }
 
     @PublishedApi
-    internal var dataFolder: File = File(".")
+    internal val dataFolder: File by lazy {
+        try {
+            StableDiffusionHelper.dataFolder
+        } catch (_: Exception) {
+            File("out")
+        }
+    }
 
     @PublishedApi
     internal val json: Json = Json {
@@ -39,8 +54,12 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.warning(cause)
     }
 
+    @PublishedApi
+    internal val reload: Permission by StableDiffusionPermissions
+
     @EventHandler
     public fun MessageEvent.reload() {
+        if (toCommandSender().hasPermission(reload).not()) return
         val content = message.contentToString()
         if (content != "重载SD") return
 
@@ -51,9 +70,12 @@ public object StableDiffusionListener : SimpleListenerHost() {
         }
     }
 
+    @PublishedApi
+    internal val txt2img: Permission by StableDiffusionPermissions
 
     @EventHandler
     public fun MessageEvent.txt2img() {
+        if (toCommandSender().hasPermission(txt2img).not()) return
         val content = message.contentToString()
         val match = """(?i)t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
@@ -95,6 +117,34 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
                 subject.uploadImage(temp)
             }.toMessageChain()
+
+            subject.sendMessage(message)
+        }
+    }
+
+
+    @PublishedApi
+    internal val styles: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.styles() {
+        if (toCommandSender().hasPermission(styles).not()) return
+        val content = message.contentToString()
+        """(?i)styles|风格""".toRegex().find(content) ?: return
+
+        logger.info("styles for $sender")
+        val sd = client
+
+        launch {
+            val info = sd.getPromptStyles()
+            val message = buildString {
+                for (style in info) {
+                    appendLine(style.name)
+                }
+                ifEmpty {
+                    appendLine("内容为空")
+                }
+            }
 
             subject.sendMessage(message)
         }

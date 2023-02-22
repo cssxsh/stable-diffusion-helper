@@ -15,8 +15,10 @@ public object StableDiffusionHelper : KotlinPlugin(
 ) {
     override fun onEnable() {
         StableDiffusionConfig.reload()
-        StableDiffusionListener.configFolder = configFolder
-        StableDiffusionListener.dataFolder = dataFolder
+        StableDiffusionListener.configFolder
+        StableDiffusionListener.dataFolder
+        StableDiffusionListener.reload
+        StableDiffusionListener.txt2img
         StableDiffusionListener.registerTo(globalEventChannel())
     }
 
