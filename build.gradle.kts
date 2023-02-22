@@ -3,15 +3,26 @@ plugins {
     kotlin("plugin.serialization") version "1.7.22"
 
     id("net.mamoe.mirai-console") version "2.14.0"
+    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
 }
 
 group = "xyz.cssxsh"
 version = "0.1.0"
 
+mavenCentralPublish {
+    useCentralS01()
+    singleDevGithubProject("cssxsh", "stable-diffusion-helper")
+    licenseFromGitHubProject("AGPL-3.0")
+    workingDir = System.getenv("PUBLICATION_TEMP")?.let { file(it).resolve(projectName) }
+        ?: buildDir.resolve("publishing-tmp")
+    publication {
+        artifact(tasks["buildPlugin"])
+    }
+}
+
 repositories {
     mavenCentral()
 }
-
 
 dependencies {
     testImplementation(kotlin("test"))
