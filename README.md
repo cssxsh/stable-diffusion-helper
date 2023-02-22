@@ -15,6 +15,7 @@
 
 ### `t2i`
 
+以文生图  
 权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:txt2img`  
 例子:
 ```log
@@ -23,6 +24,7 @@ steps=50
 width=360
 height=540
 #德克萨斯
+night, rain, wet
 ```
 ```log
 t2i 123456
@@ -34,29 +36,27 @@ physically-based rendering, <lora:arknightsTexasThe_v10:1>, <lora:koreanDollLike
 * 设置种子 `t2i $seed`
 * 设置参数 `key=value`
 * 使用Styles `#xxx`
-* 要两行以上才会触发指令
+* 第二行开始才会计入 `prompt`, 所以要两行以上才会触发指令
 
 支持的参数 
-* `height` Height
-* `width` Width
-* `sampler_name` Sampling method
-* `steps` Sampling steps
-* `batch_size` Batch size
-* `n_iter` Batch count
-* `cfg_scale` CFG Scale
-* `restore_faces` Restore faces
-* `tiling` Tiling
-* `enable_hr` Hires. fix
-* `hr_second_pass_steps` Hires Steps
-* `denoising_strength` Denoising strength
-* `hr_upscaler` Upscaler
-* `hr_scale` Upscale by
-
-`Styles` 是 `Stable Diffusion web UI` 自带的功能，用于快捷的填充 `prompt` 和 `negative_prompt`  
-![Styles.png](.github/Styles.png)
+* `height` Height `360`
+* `width` Width `540`
+* `sampler_name` Sampling method `Euler a`
+* `steps` Sampling steps `32`
+* `batch_size` Batch size `1`
+* `n_iter` Batch count `1`
+* `cfg_scale` CFG Scale `数字`
+* `restore_faces` Restore faces `false`/`true`
+* `tiling` Tiling `false`/`true`
+* `enable_hr` Hires. fix `false`/`true`
+* `hr_second_pass_steps` Hires Steps `0`
+* `denoising_strength` Denoising strength `0.7`
+* `hr_upscaler` Upscaler `Latent`
+* `hr_scale` Upscale by `2.0`
 
 ### `styles`
 
+查看已经载入的 `Styles`  
 权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:styles`  
 例子:
 ```log
@@ -66,8 +66,12 @@ styles
 风格 
 ```
 
+`Styles` 是 `Stable Diffusion web UI` 自带的功能，用于快捷的填充 `prompt` 和 `negative_prompt`  
+![Styles.png](.github/Styles.png)
+
 ### `重载SD`
 
+重载`client.yml`  
 权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:reload`  
 例子:
 ```log
