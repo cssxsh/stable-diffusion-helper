@@ -53,7 +53,7 @@ public class StableDiffusionTextToImageBuilder {
      * Styles
      */
     @StableDiffusionDSL
-    public var styles: List<String> = listOf("anime")
+    public var styles: List<String> = emptyList()
 
     // region Sampling
 
