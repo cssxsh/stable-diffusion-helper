@@ -61,7 +61,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
     public fun MessageEvent.reload() {
         if (toCommandSender().hasPermission(reload).not()) return
         val content = message.contentToString()
-        if (content != "重载SD") return
+        """(?i)^(?:reload-sd|重载SD)""".toRegex().find(content) ?: return
 
         with(StableDiffusionHelper) {
             StableDiffusionConfig.reload()
@@ -77,7 +77,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
     public fun MessageEvent.txt2img() {
         if (toCommandSender().hasPermission(txt2img).not()) return
         val content = message.contentToString()
-        val match = """(?i)t2i\s*(\d*)""".toRegex().find(content) ?: return
+        val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
         val seed1 = seed0.toLongOrNull() ?: Random.nextUInt().toLong()
@@ -130,7 +130,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
     public fun MessageEvent.styles() {
         if (toCommandSender().hasPermission(styles).not()) return
         val content = message.contentToString()
-        """(?i)styles|风格""".toRegex().find(content) ?: return
+        """(?i)^(?:styles|风格)""".toRegex().find(content) ?: return
 
         logger.info("styles for $sender")
         val sd = client
