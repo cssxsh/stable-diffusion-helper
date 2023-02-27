@@ -69,7 +69,7 @@ public class StableDiffusionClient(@PublishedApi internal val config: StableDiff
         return generateTextToImage(builder = builder)
     }
 
-    public suspend fun generateImageToImage(builder: StableDiffusionTextToImageBuilder): ImageResponse {
+    public suspend fun generateImageToImage(builder: StableDiffusionImageToImageBuilder): ImageResponse {
         return http.post {
             url("/sdapi/v1/img2img")
 
@@ -78,8 +78,8 @@ public class StableDiffusionClient(@PublishedApi internal val config: StableDiff
         }.body()
     }
 
-    public suspend inline fun generateImageToImage(block: StableDiffusionTextToImageBuilder.() -> Unit): ImageResponse {
-        val builder = StableDiffusionTextToImageBuilder().apply(block)
+    public suspend inline fun generateImageToImage(block: StableDiffusionImageToImageBuilder.() -> Unit): ImageResponse {
+        val builder = StableDiffusionImageToImageBuilder().apply(block)
         return generateImageToImage(builder = builder)
     }
 

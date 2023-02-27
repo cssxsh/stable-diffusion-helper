@@ -1,9 +1,11 @@
 package xyz.cssxsh.diffusion
 
+import io.ktor.util.*
 import kotlinx.serialization.json.*
+import java.io.File
 import kotlin.random.*
 
-public class StableDiffusionTextToImageBuilder {
+public class StableDiffusionImageToImageBuilder {
 
     // region Keywords
 
@@ -171,43 +173,39 @@ public class StableDiffusionTextToImageBuilder {
 
     // endregion
 
-    // region Hires. fix
-
     /**
-     * Hires. fix
+     * Init Images
      */
     @StableDiffusionDSL
-    public var enableHR: Boolean = false
+    public var initImages: List<String> = emptyList()
 
     /**
-     * Upscale by
+     * Init Images
      */
     @StableDiffusionDSL
-    public var hrScale: Double = 2.0
+    public fun image(block: MutableList<String>.() -> Unit) {
+        initImages = buildList(block)
+    }
 
     /**
-     * Upscaler
+     * Init Images
      */
     @StableDiffusionDSL
-    public var hrUpscaler: String = "Latent"
+    public fun MutableList<String>.addBase64(file: File): Boolean {
+        return add(base64(file = file))
+    }
 
     /**
-     * Hires Steps
+     * Init Images
      */
     @StableDiffusionDSL
-    public var hrSecondPassSteps: Int = 0
-
-    /**
-     * Resize width to
-     */
-    @StableDiffusionDSL
-    public var hrResizeX: Int? = null
-
-    /**
-     * Resize width to
-     */
-    @StableDiffusionDSL
-    public var hrResizeY: Int? = null
+    public fun base64(file: File): String {
+        val type = when (val extension = file.extension) {
+            "jpg"  -> "jpeg"
+            else -> extension
+        }
+        return "data:image/${type};base64,${file.readBytes().encodeBase64()}"
+    }
 
     /**
      * Denoising strength
@@ -215,7 +213,25 @@ public class StableDiffusionTextToImageBuilder {
     @StableDiffusionDSL
     public var denoisingStrength: Double = 0.7
 
-    // endregion
+    /**
+     * Resize Mode
+     */
+    @StableDiffusionDSL
+    public var resizeMode: ResizeMode = ResizeMode.JUST_RESIZE
+
+    /**
+     * Maskmask
+     */
+    @StableDiffusionDSL
+    public var mask: String = ""
+
+    @StableDiffusionDSL
+    public fun mask(file: File) {
+        mask = base64(file = file)
+    }
+
+    @StableDiffusionDSL
+    public var maskBlur: Int = 4
 
     public val raw: MutableMap<String, JsonElement> = HashMap()
 
@@ -228,6 +244,16 @@ public class StableDiffusionTextToImageBuilder {
         put("negative_prompt", negativePrompt)
 
         putJsonArray("styles") { for (style in styles) add(style) }
+
+        check(initImages.isNotEmpty()) { "不能为空" }
+        putJsonArray("init_images") { for (image in initImages) add(image) }
+
+        put("resize_mode", resizeMode.ordinal)
+
+        if (mask.isNotEmpty()) {
+            put("mask", mask)
+            put("mask_blur", maskBlur)
+        }
 
         put("seed", seed)
         if (subSeed != -1L) {
@@ -246,16 +272,7 @@ public class StableDiffusionTextToImageBuilder {
 
         put("sampler_name", samplerName)
 
-        if (enableHR) {
-            put("enable_hr", true)
-            put("hr_second_pass_steps", hrSecondPassSteps)
-            put("denoising_strength", denoisingStrength)
-            put("hr_upscaler", hrUpscaler)
-
-            put("hr_scale", hrScale)
-            put("hr_resize_x", hrResizeX)
-            put("hr_resize_y", hrResizeY)
-        }
+        put("denoising_strength", denoisingStrength)
 
         if (scriptName.isNotEmpty() && scriptName != "None") {
             put("script_name", scriptName)
