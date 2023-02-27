@@ -1,5 +1,7 @@
 package xyz.cssxsh.mirai.diffusion
 
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
@@ -10,6 +12,7 @@ import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.event.*
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
 import xyz.cssxsh.diffusion.*
@@ -122,6 +125,76 @@ public object StableDiffusionListener : SimpleListenerHost() {
         }
     }
 
+    @PublishedApi
+    internal val img2img: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.img2img() {
+        if (toCommandSender().hasPermission(img2img).not()) return
+        val content = message.findIsInstance<PlainText>()?.content ?: return
+        val match = """(?i)^i2i\s*(\d*)""".toRegex().find(content) ?: return
+        val (seed0) = match.destructured
+        val next = content.substringAfter('\n', "").ifEmpty { return }
+        val seed1 = seed0.toLongOrNull() ?: Random.nextUInt().toLong()
+
+        logger.info("i2i for $sender with seed: $seed1")
+        val sd = client
+        val out = dataFolder
+
+
+
+
+        launch {
+            val images = message.filterIsInstance<Image>().associateWith { image ->
+                sd.http.get(image.queryUrl()).body<ByteArray>()
+            }
+
+            val info = sd.generateImageToImage {
+                seed = seed1
+
+                images {
+                    for ((image, bytes) in images) {
+                        val type = when (image.imageType) {
+                            ImageType.PNG, ImageType.APNG -> "png"
+                            ImageType.BMP -> "bmp"
+                            ImageType.JPG -> "jpeg"
+                            ImageType.GIF, ImageType.UNKNOWN -> "gif"
+                        }
+                        add("data:image/${type};base64,${bytes.encodeBase64()}")
+                    }
+                }
+
+                prompt = next.replace("""#(\S+)""".toRegex()) { match ->
+                    val (name) = match.destructured
+                    styles += name
+
+                    ""
+                }.replace("""(\S+)=(\S+)""".toRegex()) { match ->
+                    val (key, value) = match.destructured
+                    val primitive = when {
+                        value.toLongOrNull() != null -> JsonPrimitive(value.toLong())
+                        value.toDoubleOrNull() != null -> JsonPrimitive(value.toDouble())
+                        value.toBooleanStrictOrNull() != null -> JsonPrimitive(value.toBoolean())
+                        else -> JsonPrimitive(value)
+                    }
+                    raw[key] = primitive
+
+                    ""
+                }
+                if (styles.isEmpty().not()) logger.info("t2i for $sender with styles: $styles")
+                if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
+            }
+            val message = info.images.mapIndexed { index, image ->
+                val temp = out.resolve("${LocalDate.now()}/${seed1}.${info.hashCode().toHexString()}.${index}.png")
+                temp.parentFile.mkdirs()
+                temp.writeBytes(image.decodeBase64Bytes())
+
+                subject.uploadImage(temp)
+            }.toMessageChain()
+
+            subject.sendMessage(message)
+        }
+    }
 
     @PublishedApi
     internal val styles: Permission by StableDiffusionPermissions

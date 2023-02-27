@@ -19,6 +19,8 @@ public object StableDiffusionHelper : KotlinPlugin(
         StableDiffusionListener.dataFolder
         StableDiffusionListener.reload
         StableDiffusionListener.txt2img
+        StableDiffusionListener.img2img
+        StableDiffusionListener.styles
         StableDiffusionListener.registerTo(globalEventChannel())
     }
 

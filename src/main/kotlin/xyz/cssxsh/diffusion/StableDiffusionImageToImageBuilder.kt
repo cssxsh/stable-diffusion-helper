@@ -183,7 +183,7 @@ public class StableDiffusionImageToImageBuilder {
      * Init Images
      */
     @StableDiffusionDSL
-    public fun image(block: MutableList<String>.() -> Unit) {
+    public fun images(block: MutableList<String>.() -> Unit) {
         initImages = buildList(block)
     }
 
