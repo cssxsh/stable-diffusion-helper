@@ -141,26 +141,23 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-
-
-
         launch {
             val images = message.filterIsInstance<Image>().associateWith { image ->
-                sd.http.get(image.queryUrl()).body<ByteArray>()
+                ImageFileHolder.load(image)
             }
 
             val info = sd.generateImageToImage {
                 seed = seed1
 
                 images {
-                    for ((image, bytes) in images) {
+                    for ((image, file) in images) {
                         val type = when (image.imageType) {
                             ImageType.PNG, ImageType.APNG -> "png"
                             ImageType.BMP -> "bmp"
                             ImageType.JPG -> "jpeg"
                             ImageType.GIF, ImageType.UNKNOWN -> "gif"
                         }
-                        add("data:image/${type};base64,${bytes.encodeBase64()}")
+                        add("data:image/${type};base64,${file.readBytes().encodeBase64()}")
                     }
                 }
 
