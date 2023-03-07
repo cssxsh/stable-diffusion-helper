@@ -41,13 +41,13 @@ public class StableDiffusionTextToImageBuilder {
      * Height
      */
     @StableDiffusionDSL
-    public var height: Int = 540
+    public var height: Int = 512
 
     /**
      * Width
      */
     @StableDiffusionDSL
-    public var width: Int = 360
+    public var width: Int = 512
 
     /**
      * Styles

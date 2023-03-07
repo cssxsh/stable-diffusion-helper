@@ -14,7 +14,7 @@ public object StableDiffusionHelper : KotlinPlugin(
     }
 ) {
     override fun onEnable() {
-        StableDiffusionConfig.reload()
+        StableDiffusionConfig.reload()                                      // 加载config
         StableDiffusionListener.configFolder
         StableDiffusionListener.dataFolder
         StableDiffusionListener.reload

@@ -12,10 +12,11 @@ import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.event.*
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
 import xyz.cssxsh.diffusion.*
+import xyz.cssxsh.diffusion.data.ProgressResponse
+import xyz.cssxsh.diffusion.data.TextToImageResponseInfo
 import java.io.File
 import java.time.*
 import kotlin.coroutines.*
@@ -78,21 +79,42 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
     @EventHandler
     public fun MessageEvent.txt2img() {
+        // 权限判断
         if (toCommandSender().hasPermission(txt2img).not()) return
+
+        // 获取输入
         val content = message.contentToString()
+
+        // (?i) 不区分大小写
+        // ^ - 另起一行开头
+        // \s* - 匹配任意空格
+        // (\d*) - 第一组，匹配seed
         val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
+        //
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
-        val seed1 = seed0.toLongOrNull() ?: Random.nextUInt().toLong()
+        val seed1 = seed0.toLongOrNull() ?: (-1).toLong()
 
+        // 后台打印信息
         logger.info("t2i for $sender with seed: $seed1")
         val sd = client
         val out = dataFolder
 
+        // 启用一个新的协程
         launch {
-            val info = sd.generateTextToImage {
+
+            subject.sendMessage(
+                buildMessageChain {
+                    + At(sender)
+                    + "\n 正在努力绘画，请稍等."
+                }
+            )
+
+            // 绘画完成时，获取生成信息，否则阻塞
+            val response = sd.generateTextToImage {
                 seed = seed1
 
+                // 参数处理
                 prompt = next.replace("""#(\S+)""".toRegex()) { match ->
                     val (name) = match.destructured
                     styles += name
@@ -110,16 +132,49 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
                     ""
                 }
+
+                // 后台打印参数
                 if (styles.isEmpty().not()) logger.info("t2i for $sender with styles: $styles")
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
-            val message = info.images.mapIndexed { index, image ->
-                val temp = out.resolve("${LocalDate.now()}/${seed1}.${info.hashCode().toHexString()}.${index}.png")
-                temp.parentFile.mkdirs()
-                temp.writeBytes(image.decodeBase64Bytes())
 
-                subject.uploadImage(temp)
-            }.toMessageChain()
+            // 解析Response.info
+            val info =
+                Json{ignoreUnknownKeys = true}
+                    .decodeFromString(TextToImageResponseInfo.serializer(), response.info)
+
+            val message = buildForwardMessage {
+                // 输出图片
+                sender says {
+                    response.images.mapIndexed { index, image ->
+                        val temp = out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
+                        temp.parentFile.mkdirs()
+                        temp.writeBytes(image.decodeBase64Bytes())
+                        add(subject.uploadImage(temp))
+                    }
+                }
+                // 各种参数
+                sender says {
+                    appendLine("seed=" + info.seed.toString())
+                    appendLine("height=" + info.height.toString())
+                    appendLine("width=" + info.width.toString())
+                    appendLine("steps=" + info.steps.toString())
+                    appendLine("cfg_scale=" + info.cfg_scale.toString())
+                    appendLine("sampler=" + info.sampler_name)
+                    appendLine("batch_size="+info.batch_size.toString())
+                    appendLine("styles="+info.styles.toString())
+                }
+                // 正面prompt
+                sender says{
+                    appendLine("prompt:")
+                    appendLine(info.prompt)
+                }
+                // 负面prompt
+                sender says{
+                    appendLine("negative prompt:")
+                    appendLine(info.negative_prompt)
+                }
+            }
 
             subject.sendMessage(message)
         }
@@ -190,15 +245,19 @@ public object StableDiffusionListener : SimpleListenerHost() {
             }.toMessageChain()
 
             subject.sendMessage(message)
+            subject.sendMessage(At(sender))
         }
     }
 
     @PublishedApi
     internal val styles: Permission by StableDiffusionPermissions
 
+    // 打印所有的风格列表
     @EventHandler
     public fun MessageEvent.styles() {
+        // 权限判断
         if (toCommandSender().hasPermission(styles).not()) return
+
         val content = message.contentToString()
         """(?i)^(?:styles|风格)""".toRegex().find(content) ?: return
 
