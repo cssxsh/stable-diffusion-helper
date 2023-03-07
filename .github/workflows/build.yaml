@@ -7,9 +7,6 @@ on:
     paths-ignore:
       - '**/*.md'
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -32,5 +29,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
-          name: build-${{ GITHUB_SHA }}
+          name: build-$GITHUB_SHA
           path: build/mirai/*
