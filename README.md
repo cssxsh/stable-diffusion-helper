@@ -11,7 +11,7 @@
 *   [Permission Command](https://github.com/mamoe/mirai/blob/dev/mirai-console/docs/BuiltInCommands.md#permissioncommand)
 *   [Stable Diffusion web UI Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API)
 
-本插件对接的是 `Stable Diffusion web UI` 的 REST API, 请在启动配置中开启选项，详情请自行查询 Stable Diffusion web UI Wiki
+本插件对接的是 `Stable Diffusion web UI` 的 REST API, 需要启动配置中开启选项, 详情请自行查询 [WIKI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API)  
 
 ## 使用
 
