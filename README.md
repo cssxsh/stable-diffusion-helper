@@ -56,6 +56,9 @@ physically-based rendering, <lora:arknightsTexasThe_v10:1>, <lora:koreanDollLike
 * `hr_upscaler` Upscaler `Latent`
 * `hr_scale` Upscale by `2.0`
 
+关于 `Negative Prompt`, 由于他和 `Prompt` 一样是分组多词汇的，同时对他们进行支持很麻烦  
+所以如果你要用到 `Negative Prompt`, 建议在 `Styles` 加入常用的词组，然后使用 `#xxx` 调用
+
 ### `styles`
 
 查看已经载入的 `Styles`  
@@ -71,14 +74,24 @@ styles
 `Styles` 是 `Stable Diffusion web UI` 自带的功能，用于快捷的填充 `prompt` 和 `negative_prompt`  
 ![Styles.png](.github/Styles.png)
 
-### `重载SD`
+### `reload-sd`
 
 重载`client.yml`  
 权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:reload`  
 例子:
 ```log
+reload-sd
+```
+```log
 重载SD
 ```
+
+### `i2i`
+
+以图生图  
+权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:img2img`
+
+支持的参数 基本同 `t2i` 一致
 
 ## 配置
 
