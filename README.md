@@ -2,7 +2,7 @@
 
 > 基于 [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 的 图片生成插件
 
-[![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh.mirai/mirai-openai-plugin)](https://search.maven.org/artifact/xyz.cssxsh.mirai/mirai-openai-plugin)
+[![maven-central](https://img.shields.io/maven-central/v/xyz.cssxsh/stable-diffusion-helper)](https://search.maven.org/artifact/xyz.cssxsh/stable-diffusion-helper)
 [![MiraiForum](https://img.shields.io/badge/post-on%20MiraiForum-yellow)](https://mirai.mamoe.net/topic/1657)
 
 **使用前应该查阅的相关文档或项目**
