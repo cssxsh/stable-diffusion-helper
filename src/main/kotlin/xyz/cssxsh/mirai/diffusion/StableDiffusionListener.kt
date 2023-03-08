@@ -135,22 +135,24 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         }
                     }
                     sender says {
-                        appendLine("seed=" + info.get("seed").toString())
-                        appendLine("height=" + info.get("height").toString())
-                        appendLine("width=" + info.get("width").toString())
-                        appendLine("steps=" + info.get("steps").toString())
-                        appendLine("cfg_scale=" + info.get("cfg_Scale").toString())
-                        appendLine("sampler=" + info.get("sampler_name"))
-                        appendLine("batch_size=" + info.get("batch_size").toString())
-                        appendLine("styles=" + info.get("styles").toString())
+                        appendLine("seed=${info["seed"]}")
+                        appendLine("height=${info["height"]}")
+                        appendLine("width=${info["width"]}")
+                        appendLine("steps=${info["steps"]}")
+                        appendLine("cfg_scale=${info["cfg_scale"]}")
+                        appendLine("sampler=${info["sampler_name"]}")
+                        appendLine("batch_size=${info["batch_size"]}")
+                        (info["styles"] as? JsonArray).orEmpty().forEach { style ->
+                            appendLine("#${style.jsonPrimitive.content}")
+                        }
                     }
                     sender says {
                         appendLine("prompt:")
-                        appendLine(info.get("prompt").toString())
+                        appendLine(info["prompt"]?.jsonPrimitive?.content)
                     }
                     sender says {
                         appendLine("negative prompt:")
-                        appendLine(info.get("negative_prompt").toString())
+                        appendLine(info["negative_prompt"]?.jsonPrimitive?.content)
                     }
                 }
 
@@ -247,24 +249,26 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     }.toMessageChain()
 
                     sender says {
-                        appendLine("seed=" + info.get("seed").toString())
-                        appendLine("height=" + info.get("height").toString())
-                        appendLine("width=" + info.get("width").toString())
-                        appendLine("steps=" + info.get("steps").toString())
-                        appendLine("cfg_scale=" + info.get("cfg_Scale").toString())
-                        appendLine("sampler=" + info.get("sampler_name"))
-                        appendLine("batch_size=" + info.get("batch_size").toString())
-                        appendLine("styles=" + info.get("styles").toString())
+                        appendLine("seed=${info["seed"]}")
+                        appendLine("height=${info["height"]}")
+                        appendLine("width=${info["width"]}")
+                        appendLine("steps=${info["steps"]}")
+                        appendLine("cfg_scale=${info["cfg_scale"]}")
+                        appendLine("sampler=${info["sampler_name"]}")
+                        appendLine("batch_size=${info["batch_size"]}")
+                        (info["styles"] as? JsonArray).orEmpty().forEach { style ->
+                            appendLine("#${style.jsonPrimitive.content}")
+                        }
                     }
 
                     sender says {
                         appendLine("prompt:")
-                        appendLine(info.get("prompt").toString())
+                        appendLine(info["prompt"]?.jsonPrimitive?.content)
                     }
 
                     sender says {
                         appendLine("negative prompt:")
-                        appendLine(info.get("negative_prompt").toString())
+                        appendLine(info["negative_prompt"]?.jsonPrimitive?.content)
                     }
 
                     sender says {
