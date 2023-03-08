@@ -1,7 +1,5 @@
 package xyz.cssxsh.mirai.diffusion
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
@@ -12,7 +10,6 @@ import net.mamoe.mirai.contact.Contact.Companion.uploadImage
 import net.mamoe.mirai.event.*
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
 import xyz.cssxsh.diffusion.*
