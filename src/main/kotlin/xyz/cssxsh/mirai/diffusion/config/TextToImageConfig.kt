@@ -10,11 +10,11 @@ internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
 
     @ValueName("width")
     @ValueDescription("默认宽度")
-    val width: Int by value(512)
+    val width: Int by value(540)
 
     @ValueName("height")
     @ValueDescription("默认高度")
-    val height: Int by value(512)
+    val height: Int by value(360)
 
     @ValueName("steps")
     @ValueDescription("默认steps")
