@@ -176,6 +176,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     subject.uploadImage(temp)
                 }.toMessageChain()
 
+                }
                 subject.sendMessage(message)
             }
         }
