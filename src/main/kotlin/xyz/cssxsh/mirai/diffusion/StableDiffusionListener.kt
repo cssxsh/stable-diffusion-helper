@@ -115,8 +115,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     styles += name
 
                     ""
-                }.replace("""(\S+)=(\S+)""".toRegex()) { match ->
-                    val (key, value) = match.destructured
+                }.replace("""(\S+)=(".+?"|\S+)""".toRegex()) { match ->
+                    val (key, value0) = match.destructured
+                    val value = value0.removeSurrounding("\"")
                     val primitive = when {
                         value.toLongOrNull() != null -> JsonPrimitive(value.toLong())
                         value.toDoubleOrNull() != null -> JsonPrimitive(value.toDouble())
@@ -237,8 +238,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     styles += name
 
                     ""
-                }.replace("""(\S+)=(\S+)""".toRegex()) { match ->
-                    val (key, value) = match.destructured
+                }.replace("""(\S+)=(".+?"|\S+)""".toRegex()) { match ->
+                    val (key, value0) = match.destructured
+                    val value = value0.removeSurrounding("\"")
                     val primitive = when {
                         value.toLongOrNull() != null -> JsonPrimitive(value.toLong())
                         value.toDoubleOrNull() != null -> JsonPrimitive(value.toDouble())
