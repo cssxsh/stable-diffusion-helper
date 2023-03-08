@@ -13,8 +13,8 @@ import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
 import xyz.cssxsh.diffusion.*
-import xyz.cssxsh.diffusion.data.ProgressResponse
 import xyz.cssxsh.diffusion.data.TextToImageResponseInfo
+import xyz.cssxsh.mirai.diffusion.config.TextToImageConfig
 import java.io.File
 import java.time.*
 import kotlin.coroutines.*
@@ -78,11 +78,14 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @EventHandler
     public fun MessageEvent.txt2img() {
         if (toCommandSender().hasPermission(txt2img).not()) return
+
         val content = message.contentToString()
+
         val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
         val seed1 = seed0.toLongOrNull() ?: (-1).toLong()
+
         logger.info("t2i for $sender with seed: $seed1")
         val sd = client
         val out = dataFolder
@@ -97,6 +100,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
             )
 
             val response = sd.generateTextToImage {
+
+                TextToImageConfig.push(this)
+
                 seed = seed1
 
                 prompt = next.replace("""#(\S+)""".toRegex()) { match ->
@@ -121,43 +127,58 @@ public object StableDiffusionListener : SimpleListenerHost() {
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
 
-            val info =
-                Json{ignoreUnknownKeys = true}
-                    .decodeFromString(TextToImageResponseInfo.serializer(), response.info)
+            if(TextToImageConfig.Detailed_output == true) {
 
-            val message = buildForwardMessage {
-                sender says {
-                    response.images.mapIndexed { index, image ->
-                        val temp = out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
-                        temp.parentFile.mkdirs()
-                        temp.writeBytes(image.decodeBase64Bytes())
-                        add(subject.uploadImage(temp))
+                val info =
+                    Json { ignoreUnknownKeys = true }
+                        .decodeFromString(TextToImageResponseInfo.serializer(), response.info)
+
+                val message = buildForwardMessage {
+                    sender says {
+                        response.images.mapIndexed { index, image ->
+                            val temp = out.resolve(
+                                "${LocalDate.now()}/${seed1}.${
+                                    response.hashCode().toHexString()
+                                }.${index}.png"
+                            )
+                            temp.parentFile.mkdirs()
+                            temp.writeBytes(image.decodeBase64Bytes())
+                            add(subject.uploadImage(temp))
+                        }
+                    }
+                    sender says {
+                        appendLine("seed=" + info.seed.toString())
+                        appendLine("height=" + info.height.toString())
+                        appendLine("width=" + info.width.toString())
+                        appendLine("steps=" + info.steps.toString())
+                        appendLine("cfg_scale=" + info.cfg_scale.toString())
+                        appendLine("sampler=" + info.sampler_name)
+                        appendLine("batch_size=" + info.batch_size.toString())
+                        appendLine("styles=" + info.styles.toString())
+                    }
+                    sender says {
+                        appendLine("prompt:")
+                        appendLine(info.prompt)
+                    }
+                    sender says {
+                        appendLine("negative prompt:")
+                        appendLine(info.negative_prompt)
                     }
                 }
 
-                sender says {
-                    appendLine("seed=" + info.seed.toString())
-                    appendLine("height=" + info.height.toString())
-                    appendLine("width=" + info.width.toString())
-                    appendLine("steps=" + info.steps.toString())
-                    appendLine("cfg_scale=" + info.cfg_scale.toString())
-                    appendLine("sampler=" + info.sampler_name)
-                    appendLine("batch_size="+info.batch_size.toString())
-                    appendLine("styles="+info.styles.toString())
-                }
-                
-                sender says{
-                    appendLine("prompt:")
-                    appendLine(info.prompt)
-                }
-                
-                sender says{
-                    appendLine("negative prompt:")
-                    appendLine(info.negative_prompt)
-                }
+                subject.sendMessage(message)
             }
+            else{
+                val message = response.images.mapIndexed { index, image ->
+                    val temp = out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
+                    temp.parentFile.mkdirs()
+                    temp.writeBytes(image.decodeBase64Bytes())
 
-            subject.sendMessage(message)
+                    subject.uploadImage(temp)
+                }.toMessageChain()
+
+                subject.sendMessage(message)
+            }
         }
     }
 
@@ -233,11 +254,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @PublishedApi
     internal val styles: Permission by StableDiffusionPermissions
 
-    
     @EventHandler
     public fun MessageEvent.styles() {
         if (toCommandSender().hasPermission(styles).not()) return
-
         val content = message.contentToString()
         """(?i)^(?:styles|风格)""".toRegex().find(content) ?: return
 
