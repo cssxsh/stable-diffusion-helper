@@ -5,11 +5,15 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.compression.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.*
-import net.mamoe.mirai.message.data.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
-import java.io.*
+import java.io.File
 import java.util.*
 
 public object ImageFileHolder {

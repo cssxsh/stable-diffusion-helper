@@ -3,7 +3,8 @@ package xyz.cssxsh.diffusion
 import io.ktor.util.*
 import kotlinx.serialization.json.*
 import java.io.File
-import kotlin.random.*
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 public class StableDiffusionImageToImageBuilder {
 
@@ -201,7 +202,7 @@ public class StableDiffusionImageToImageBuilder {
     @StableDiffusionDSL
     public fun base64(file: File): String {
         val type = when (val extension = file.extension) {
-            "jpg"  -> "jpeg"
+            "jpg" -> "jpeg"
             else -> extension
         }
         return "data:image/${type};base64,${file.readBytes().encodeBase64()}"

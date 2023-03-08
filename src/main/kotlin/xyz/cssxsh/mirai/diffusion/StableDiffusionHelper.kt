@@ -1,8 +1,12 @@
 package xyz.cssxsh.mirai.diffusion
 
-import kotlinx.coroutines.*
-import net.mamoe.mirai.console.plugin.jvm.*
-import net.mamoe.mirai.event.*
+import kotlinx.coroutines.cancel
+import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
+import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.event.globalEventChannel
+import net.mamoe.mirai.event.registerTo
+import xyz.cssxsh.mirai.diffusion.config.ImageToImageConfig
+import xyz.cssxsh.mirai.diffusion.config.TextToImageConfig
 
 public object StableDiffusionHelper : KotlinPlugin(
     JvmPluginDescription(
@@ -13,8 +17,13 @@ public object StableDiffusionHelper : KotlinPlugin(
         author("cssxsh")
     }
 ) {
+
     override fun onEnable() {
+
         StableDiffusionConfig.reload()
+        TextToImageConfig.reload()
+        ImageToImageConfig.reload()
+
         StableDiffusionListener.configFolder
         StableDiffusionListener.dataFolder
         StableDiffusionListener.reload

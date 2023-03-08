@@ -1,22 +1,29 @@
 package xyz.cssxsh.mirai.diffusion
 
 import io.ktor.util.*
-import kotlinx.coroutines.*
-import kotlinx.serialization.json.*
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import net.mamoe.mirai.console.command.CommandSender.Companion.toCommandSender
-import net.mamoe.mirai.console.permission.*
+import net.mamoe.mirai.console.permission.Permission
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
-import net.mamoe.mirai.event.*
-import net.mamoe.mirai.event.events.*
+import net.mamoe.mirai.event.EventHandler
+import net.mamoe.mirai.event.SimpleListenerHost
+import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.utils.*
+import net.mamoe.mirai.utils.MiraiLogger
 import okhttp3.internal.toHexString
-import xyz.cssxsh.diffusion.*
+import xyz.cssxsh.diffusion.StableDiffusionApiException
+import xyz.cssxsh.diffusion.StableDiffusionClient
+import xyz.cssxsh.mirai.diffusion.config.ImageToImageConfig
+import xyz.cssxsh.mirai.diffusion.config.TextToImageConfig
 import java.io.File
-import java.time.*
-import kotlin.coroutines.*
-import kotlin.random.*
+import java.time.LocalDate
+import kotlin.coroutines.CoroutineContext
+import kotlin.random.Random
+import kotlin.random.nextUInt
 
 public object StableDiffusionListener : SimpleListenerHost() {
 
@@ -76,18 +83,31 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @EventHandler
     public fun MessageEvent.txt2img() {
         if (toCommandSender().hasPermission(txt2img).not()) return
+
         val content = message.contentToString()
+
         val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
-        val seed1 = seed0.toLongOrNull() ?: Random.nextUInt().toLong()
+        val seed1 = seed0.toLongOrNull() ?: -1L
 
         logger.info("t2i for $sender with seed: $seed1")
         val sd = client
         val out = dataFolder
 
         launch {
-            val info = sd.generateTextToImage {
+
+            subject.sendMessage(
+                buildMessageChain {
+                    +At(sender)
+                    +"\n 正在努力绘画，请稍等."
+                }
+            )
+
+            val response = sd.generateTextToImage {
+
+                TextToImageConfig.push(this)
+
                 seed = seed1
 
                 prompt = next.replace("""#(\S+)""".toRegex()) { match ->
@@ -107,18 +127,59 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
                     ""
                 }
+
                 if (styles.isEmpty().not()) logger.info("t2i for $sender with styles: $styles")
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
-            val message = info.images.mapIndexed { index, image ->
-                val temp = out.resolve("${LocalDate.now()}/${seed1}.${info.hashCode().toHexString()}.${index}.png")
-                temp.parentFile.mkdirs()
-                temp.writeBytes(image.decodeBase64Bytes())
 
-                subject.uploadImage(temp)
-            }.toMessageChain()
+            val message = when (TextToImageConfig.detailedOutput) {
+                true -> buildForwardMessage {
+                    val info = Json.decodeFromString(JsonObject.serializer(), response.info)
+
+                    sender says {
+                        response.images.mapIndexed { index, image ->
+                            val temp = out.resolve(
+                                "${LocalDate.now()}/${seed1}.${
+                                    response.hashCode().toHexString()
+                                }.${index}.png"
+                            )
+                            temp.parentFile.mkdirs()
+                            temp.writeBytes(image.decodeBase64Bytes())
+                            add(subject.uploadImage(temp))
+                        }
+                    }
+                    sender says {
+                        appendLine("seed=" + info.get("seed").toString())
+                        appendLine("height=" + info.get("height").toString())
+                        appendLine("width=" + info.get("width").toString())
+                        appendLine("steps=" + info.get("steps").toString())
+                        appendLine("cfg_scale=" + info.get("cfg_Scale").toString())
+                        appendLine("sampler=" + info.get("sampler_name"))
+                        appendLine("batch_size=" + info.get("batch_size").toString())
+                        appendLine("styles=" + info.get("styles").toString())
+                    }
+                    sender says {
+                        appendLine("prompt:")
+                        appendLine(info.get("prompt").toString())
+                    }
+                    sender says {
+                        appendLine("negative prompt:")
+                        appendLine(info.get("negative_prompt").toString())
+                    }
+                }
+
+                false -> response.images.mapIndexed { index, image ->
+                    val temp =
+                        out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
+                    temp.parentFile.mkdirs()
+                    temp.writeBytes(image.decodeBase64Bytes())
+
+                    subject.uploadImage(temp)
+                }.toMessageChain()
+            }
 
             subject.sendMessage(message)
+            subject.sendMessage(At(sender))
         }
     }
 
@@ -128,7 +189,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @EventHandler
     public fun MessageEvent.img2img() {
         if (toCommandSender().hasPermission(img2img).not()) return
+
         val content = message.findIsInstance<PlainText>()?.content ?: return
+
         val match = """(?i)^i2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
@@ -139,11 +202,22 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val out = dataFolder
 
         launch {
+
+            subject.sendMessage(
+                buildMessageChain {
+                    +At(sender)
+                    +"\n 正在执行图生图，请稍等."
+                }
+            )
+
             val images = message.filterIsInstance<Image>().associateWith { image ->
                 ImageFileHolder.load(image)
             }
 
-            val info = sd.generateImageToImage {
+            val response = sd.generateImageToImage {
+
+                ImageToImageConfig.push(this)
+
                 seed = seed1
 
                 images {
@@ -178,15 +252,62 @@ public object StableDiffusionListener : SimpleListenerHost() {
                 if (styles.isEmpty().not()) logger.info("t2i for $sender with styles: $styles")
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
-            val message = info.images.mapIndexed { index, image ->
-                val temp = out.resolve("${LocalDate.now()}/${seed1}.${info.hashCode().toHexString()}.${index}.png")
-                temp.parentFile.mkdirs()
-                temp.writeBytes(image.decodeBase64Bytes())
 
-                subject.uploadImage(temp)
-            }.toMessageChain()
+            val message = when (ImageToImageConfig.detailedOutput) {
+                true -> buildForwardMessage() {
+                    val info = Json.decodeFromString(JsonObject.serializer(), response.info)
+
+                    sender says response.images.mapIndexed { index, image ->
+                        val temp =
+                            out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
+                        temp.parentFile.mkdirs()
+                        temp.writeBytes(image.decodeBase64Bytes())
+
+                        subject.uploadImage(temp)
+                    }.toMessageChain()
+
+                    sender says {
+                        appendLine("seed=" + info.get("seed").toString())
+                        appendLine("height=" + info.get("height").toString())
+                        appendLine("width=" + info.get("width").toString())
+                        appendLine("steps=" + info.get("steps").toString())
+                        appendLine("cfg_scale=" + info.get("cfg_Scale").toString())
+                        appendLine("sampler=" + info.get("sampler_name"))
+                        appendLine("batch_size=" + info.get("batch_size").toString())
+                        appendLine("styles=" + info.get("styles").toString())
+                    }
+
+                    sender says {
+                        appendLine("prompt:")
+                        appendLine(info.get("prompt").toString())
+                    }
+
+                    sender says {
+                        appendLine("negative prompt:")
+                        appendLine(info.get("negative_prompt").toString())
+                    }
+
+                    sender says buildMessageChain {
+                        +"原图:\n"
+                        for ((image, file) in images) {
+                            +image
+                        }
+                    }
+
+                }
+
+                false -> response.images.mapIndexed { index, image ->
+                    val temp =
+                        out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
+                    temp.parentFile.mkdirs()
+                    temp.writeBytes(image.decodeBase64Bytes())
+
+                    subject.uploadImage(temp)
+                }.toMessageChain()
+            }
 
             subject.sendMessage(message)
+            subject.sendMessage(At(sender))
         }
     }
 
