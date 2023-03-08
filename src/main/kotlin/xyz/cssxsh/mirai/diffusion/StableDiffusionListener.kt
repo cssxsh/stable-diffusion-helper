@@ -1,7 +1,5 @@
 package xyz.cssxsh.mirai.diffusion
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
 import io.ktor.util.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.*
