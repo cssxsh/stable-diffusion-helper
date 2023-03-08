@@ -1,10 +1,10 @@
 package xyz.cssxsh.mirai.diffusion.config
 
 import net.mamoe.mirai.console.data.*
-import xyz.cssxsh.diffusion.StableDiffusionTextToImageBuilder
+import xyz.cssxsh.diffusion.StableDiffusionImageToImageBuilder
 
 @PublishedApi
-internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
+internal object ImageToImageConfig : ReadOnlyPluginConfig("ImageToImage") {
 
     // region http body
 
@@ -42,7 +42,7 @@ internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
     @ValueDescription("(ture/false)true时以合并转发形式输出详细信息，否则只输出图片")
     val detailedOutput: Boolean by value(false)
 
-    fun push(builder: StableDiffusionTextToImageBuilder) {
+    fun push(builder: StableDiffusionImageToImageBuilder) {
         builder.width = width
         builder.height = height
         builder.steps = steps
