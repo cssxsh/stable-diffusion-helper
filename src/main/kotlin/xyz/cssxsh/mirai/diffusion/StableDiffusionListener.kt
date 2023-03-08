@@ -127,7 +127,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
 
-            if(TextToImageConfig.Detailed_output == true) {
+            if(TextToImageConfig.detailedOutput == true) {
 
                 val info =
                     Json { ignoreUnknownKeys = true }
