@@ -133,7 +133,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     Json { ignoreUnknownKeys = true }
                         .decodeFromString(TextToImageResponseInfo.serializer(), response.info)
 
-                val message = buildForwardMessage {
+                buildForwardMessage {
                     sender says {
                         response.images.mapIndexed { index, image ->
                             val temp = out.resolve(
