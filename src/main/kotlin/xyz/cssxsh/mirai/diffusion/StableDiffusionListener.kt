@@ -166,7 +166,6 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     }
                 }
 
-                subject.sendMessage(message)
             }
             else{
                 val message = response.images.mapIndexed { index, image ->
