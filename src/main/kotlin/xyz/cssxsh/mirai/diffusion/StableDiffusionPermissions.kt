@@ -1,10 +1,9 @@
 package xyz.cssxsh.mirai.diffusion
 
-import net.mamoe.mirai.console.permission.Permission
-import net.mamoe.mirai.console.permission.PermissionService
-import net.mamoe.mirai.event.ListenerHost
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
+import net.mamoe.mirai.console.permission.*
+import net.mamoe.mirai.event.*
+import kotlin.properties.*
+import kotlin.reflect.*
 
 @PublishedApi
 internal object StableDiffusionPermissions : ReadOnlyProperty<ListenerHost, Permission> {

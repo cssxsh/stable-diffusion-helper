@@ -1,29 +1,22 @@
 package xyz.cssxsh.mirai.diffusion
 
 import io.ktor.util.*
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.coroutines.*
+import kotlinx.serialization.json.*
 import net.mamoe.mirai.console.command.CommandSender.Companion.toCommandSender
-import net.mamoe.mirai.console.permission.Permission
+import net.mamoe.mirai.console.permission.*
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact.Companion.uploadImage
-import net.mamoe.mirai.event.EventHandler
-import net.mamoe.mirai.event.SimpleListenerHost
-import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.event.*
+import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.utils.MiraiLogger
+import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
-import xyz.cssxsh.diffusion.StableDiffusionApiException
-import xyz.cssxsh.diffusion.StableDiffusionClient
-import xyz.cssxsh.mirai.diffusion.config.ImageToImageConfig
-import xyz.cssxsh.mirai.diffusion.config.TextToImageConfig
+import xyz.cssxsh.diffusion.*
+import xyz.cssxsh.mirai.diffusion.config.*
 import java.io.File
-import java.time.LocalDate
-import kotlin.coroutines.CoroutineContext
-import kotlin.random.Random
-import kotlin.random.nextUInt
+import java.time.*
+import kotlin.coroutines.*
 
 public object StableDiffusionListener : SimpleListenerHost() {
 
@@ -83,9 +76,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @EventHandler
     public fun MessageEvent.txt2img() {
         if (toCommandSender().hasPermission(txt2img).not()) return
-
         val content = message.contentToString()
-
         val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
@@ -97,12 +88,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
         launch {
 
-            subject.sendMessage(
-                buildMessageChain {
-                    +At(sender)
-                    +"\n 正在努力绘画，请稍等."
-                }
-            )
+            subject.sendMessage(At(sender) + "\n 正在努力绘画，请稍等.")
 
             val response = sd.generateTextToImage {
 
@@ -128,7 +114,6 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
                     ""
                 }
-
                 if (styles.isEmpty().not()) logger.info("t2i for $sender with styles: $styles")
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
@@ -190,13 +175,11 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @EventHandler
     public fun MessageEvent.img2img() {
         if (toCommandSender().hasPermission(img2img).not()) return
-
         val content = message.findIsInstance<PlainText>()?.content ?: return
-
         val match = """(?i)^i2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
-        val seed1 = seed0.toLongOrNull() ?: Random.nextUInt().toLong()
+        val seed1 = seed0.toLongOrNull() ?: -1L
 
         logger.info("i2i for $sender with seed: $seed1")
         val sd = client
@@ -204,12 +187,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
         launch {
 
-            subject.sendMessage(
-                buildMessageChain {
-                    +At(sender)
-                    +"\n 正在执行图生图，请稍等."
-                }
-            )
+            subject.sendMessage(At(sender) + "\n 正在执行图生图，请稍等.")
 
             val images = message.filterIsInstance<Image>().associateWith { image ->
                 ImageFileHolder.load(image)
@@ -289,10 +267,10 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         appendLine(info.get("negative_prompt").toString())
                     }
 
-                    sender says buildMessageChain {
-                        +"原图:\n"
-                        for ((image, file) in images) {
-                            +image
+                    sender says {
+                        appendLine("原图:")
+                        for ((image, _) in images) {
+                            append(image)
                         }
                     }
 

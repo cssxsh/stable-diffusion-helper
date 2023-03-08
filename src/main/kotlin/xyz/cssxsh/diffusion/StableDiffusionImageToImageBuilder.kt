@@ -3,8 +3,7 @@ package xyz.cssxsh.diffusion
 import io.ktor.util.*
 import kotlinx.serialization.json.*
 import java.io.File
-import kotlin.random.Random
-import kotlin.random.nextUInt
+import kotlin.random.*
 
 public class StableDiffusionImageToImageBuilder {
 

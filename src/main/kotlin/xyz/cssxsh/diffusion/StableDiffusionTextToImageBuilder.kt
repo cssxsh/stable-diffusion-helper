@@ -1,8 +1,7 @@
 package xyz.cssxsh.diffusion
 
 import kotlinx.serialization.json.*
-import kotlin.random.Random
-import kotlin.random.nextUInt
+import kotlin.random.*
 
 public class StableDiffusionTextToImageBuilder {
 

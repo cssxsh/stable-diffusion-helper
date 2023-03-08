@@ -9,9 +9,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 import xyz.cssxsh.diffusion.data.*
 
 public class StableDiffusionClient(@PublishedApi internal val config: StableDiffusionClientConfig) {
