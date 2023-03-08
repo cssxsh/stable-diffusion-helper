@@ -27,4 +27,4 @@ public object StableDiffusionHelper : KotlinPlugin(
     override fun onDisable() {
         StableDiffusionListener.cancel()
     }
-}
+    }
