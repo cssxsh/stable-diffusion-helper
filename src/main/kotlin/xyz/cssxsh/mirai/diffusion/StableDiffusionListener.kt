@@ -13,7 +13,6 @@ import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.*
 import okhttp3.internal.toHexString
 import xyz.cssxsh.diffusion.*
-import xyz.cssxsh.diffusion.data.TextToImageResponseInfo
 import xyz.cssxsh.mirai.diffusion.config.TextToImageConfig
 import java.io.File
 import java.time.*
@@ -127,13 +126,10 @@ public object StableDiffusionListener : SimpleListenerHost() {
                 if (raw.isEmpty().not()) logger.info("t2i for $sender with ${JsonObject(raw)}")
             }
 
-            val message = if (TextToImageConfig.detailedOutput) {
+            val message = when(TextToImageConfig.detailedOutput) {
+                true -> buildForwardMessage{
+                    val info = Json.decodeFromString(JsonObject.serializer(), response.info)
 
-                val info =
-                    Json { ignoreUnknownKeys = true }
-                        .decodeFromString(TextToImageResponseInfo.serializer(), response.info)
-
-                buildForwardMessage {
                     sender says {
                         response.images.mapIndexed { index, image ->
                             val temp = out.resolve(
@@ -147,38 +143,34 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         }
                     }
                     sender says {
-                        appendLine("seed=" + info.seed.toString())
-                        appendLine("height=" + info.height.toString())
-                        appendLine("width=" + info.width.toString())
-                        appendLine("steps=" + info.steps.toString())
-                        appendLine("cfg_scale=" + info.cfgScale.toString())
-                        appendLine("sampler=" + info.samplerName)
-                        appendLine("batch_size=" + info.batchSize.toString())
-                        appendLine("styles=" + info.styles.toString())
+                        appendLine("seed=" + info.get("seed").toString())
+                        appendLine("height=" + info.get("height").toString())
+                        appendLine("width=" + info.get("width").toString())
+                        appendLine("steps=" + info.get("steps").toString())
+                        appendLine("cfg_scale=" + info.get("cfg_Scale").toString())
+                        appendLine("sampler=" + info.get("sampler_name"))
+                        appendLine("batch_size=" + info.get("batch_size").toString())
+                        appendLine("styles=" + info.get("styles").toString())
                     }
                     sender says {
                         appendLine("prompt:")
-                        appendLine(info.prompt)
+                        appendLine(info.get("prompt").toString())
                     }
                     sender says {
                         appendLine("negative prompt:")
-                        appendLine(info.negativePrompt)
+                        appendLine(info.get("negativePrompt").toString())
                     }
                 }
-
-            } else {
-            else{
-                response.images.mapIndexed { index, image ->
+                false -> response.images.mapIndexed { index, image ->
                     val temp = out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
                     temp.parentFile.mkdirs()
                     temp.writeBytes(image.decodeBase64Bytes())
 
                     subject.uploadImage(temp)
                 }.toMessageChain()
-
-                }
-                subject.sendMessage(message)
             }
+            subject.sendMessage(At(sender))
+            subject.sendMessage(message)
         }
     }
 
