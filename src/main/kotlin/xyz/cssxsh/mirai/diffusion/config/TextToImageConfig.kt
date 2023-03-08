@@ -42,7 +42,7 @@ internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
     @ValueDescription("(ture/false)true时以合并转发形式输出详细信息，否则只输出图片")
     val Detailed_output: Boolean by value(false)
 
-    fun push(builder: StableDiffusionTextToImageBuilder)
+    fun push(builder: StableDiffusionTextToImageBuilder) {
     {
         builder.width = width
         builder.height = height
