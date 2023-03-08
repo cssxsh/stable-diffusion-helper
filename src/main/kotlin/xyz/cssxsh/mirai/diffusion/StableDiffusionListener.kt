@@ -235,10 +235,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @PublishedApi
     internal val styles: Permission by StableDiffusionPermissions
 
-    // 打印所有的风格列表
+    
     @EventHandler
     public fun MessageEvent.styles() {
-        // 权限判断
         if (toCommandSender().hasPermission(styles).not()) return
 
         val content = message.contentToString()
