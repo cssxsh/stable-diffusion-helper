@@ -84,7 +84,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val match = """(?i)^t2i\s*(\d*)""".toRegex().find(content) ?: return
         val (seed0) = match.destructured
         val next = content.substringAfter('\n', "").ifEmpty { return }
-        val seed1 = seed0.toLongOrNull() ?: (-1).toLong()
+        val seed1 = seed0.toLongOrNull() ?: -1L
 
         logger.info("t2i for $sender with seed: $seed1")
         val sd = client
