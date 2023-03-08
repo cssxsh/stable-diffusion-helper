@@ -168,7 +168,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
             } else {
             else{
-                val message = response.images.mapIndexed { index, image ->
+                response.images.mapIndexed { index, image ->
                     val temp = out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
                     temp.parentFile.mkdirs()
                     temp.writeBytes(image.decodeBase64Bytes())
