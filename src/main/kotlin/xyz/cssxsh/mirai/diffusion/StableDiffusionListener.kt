@@ -151,9 +151,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         appendLine("height=" + info.height.toString())
                         appendLine("width=" + info.width.toString())
                         appendLine("steps=" + info.steps.toString())
-                        appendLine("cfg_scale=" + info.cfg_scale.toString())
-                        appendLine("sampler=" + info.sampler_name)
-                        appendLine("batch_size=" + info.batch_size.toString())
+                        appendLine("cfg_scale=" + info.cfgScale.toString())
+                        appendLine("sampler=" + info.samplerName)
+                        appendLine("batch_size=" + info.batchSize.toString())
                         appendLine("styles=" + info.styles.toString())
                     }
                     sender says {
@@ -162,7 +162,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     }
                     sender says {
                         appendLine("negative prompt:")
-                        appendLine(info.negative_prompt)
+                        appendLine(info.negativePrompt)
                     }
                 }
 
