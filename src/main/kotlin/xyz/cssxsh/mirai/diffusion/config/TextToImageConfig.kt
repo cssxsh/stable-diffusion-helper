@@ -38,7 +38,7 @@ internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
 
     // endregion
 
-    @ValueName("Detailed Output")
+    @ValueName("detailed_output")
     @ValueDescription("(ture/false)true时以合并转发形式输出详细信息，否则只输出图片")
     val detailedOutput: Boolean by value(false)
 
