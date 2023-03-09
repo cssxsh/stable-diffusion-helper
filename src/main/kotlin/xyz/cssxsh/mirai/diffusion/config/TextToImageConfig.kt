@@ -32,7 +32,7 @@ internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {
     @ValueDescription("默认图片生成轮数")
     val batchSize: Int by value(1)
 
-    @ValueName("n_iters")
+    @ValueName("n_iter")
     @ValueDescription("默认每轮生成图片张数")
     val nIter: Int by value(1)
 
