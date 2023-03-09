@@ -25,4 +25,7 @@ public object StableDiffusionConfig : ReadOnlyPluginConfig("client"), StableDiff
     @ValueDescription("代理")
     override val proxy: String by value("")
 
+    @ValueName("cool_down_time")
+    @ValueDescription("冷却时间")
+    public val cd: Long by value(10_000L)
 }

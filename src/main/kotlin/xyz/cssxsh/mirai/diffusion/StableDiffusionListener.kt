@@ -2,6 +2,7 @@ package xyz.cssxsh.mirai.diffusion
 
 import io.ktor.util.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.*
 import kotlinx.serialization.json.*
 import net.mamoe.mirai.console.command.CommandSender.Companion.toCommandSender
 import net.mamoe.mirai.console.permission.*
@@ -49,6 +50,12 @@ public object StableDiffusionListener : SimpleListenerHost() {
     @PublishedApi
     internal val logger: MiraiLogger = MiraiLogger.Factory.create(this::class.java)
 
+    @PublishedApi
+    internal val mutex: Mutex = Mutex()
+
+    @PublishedApi
+    internal var last: Long = -1
+
     override fun handleException(context: CoroutineContext, exception: Throwable) {
         val cause = exception.cause as? StableDiffusionApiException ?: exception
         logger.warning(cause)
@@ -89,6 +96,12 @@ public object StableDiffusionListener : SimpleListenerHost() {
         launch {
 
             subject.sendMessage(At(sender) + "\n 正在努力绘画，请稍等.")
+
+            mutex.withLock {
+                val interval = System.currentTimeMillis() - last
+                delay(StableDiffusionConfig.cd - interval)
+                last = System.currentTimeMillis()
+            }
 
             val response = sd.generateTextToImage {
 
@@ -189,6 +202,12 @@ public object StableDiffusionListener : SimpleListenerHost() {
         launch {
 
             subject.sendMessage(At(sender) + "\n 正在执行图生图，请稍等.")
+
+            mutex.withLock {
+                val interval = System.currentTimeMillis() - last
+                delay(StableDiffusionConfig.cd - interval)
+                last = System.currentTimeMillis()
+            }
 
             val images = message.filterIsInstance<Image>().associateWith { image ->
                 ImageFileHolder.load(image)
