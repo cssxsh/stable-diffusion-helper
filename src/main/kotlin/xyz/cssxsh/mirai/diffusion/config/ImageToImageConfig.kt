@@ -17,7 +17,7 @@ internal object ImageToImageConfig : ReadOnlyPluginConfig("ImageToImage") {
     val height: Int by value(540)
 
     @ValueName("steps")
-    @ValueDescription("默认steps")
+    @ValueDescription("默认步数")
     val steps: Int by value(20)
 
     @ValueName("cfg_scale")
@@ -25,7 +25,7 @@ internal object ImageToImageConfig : ReadOnlyPluginConfig("ImageToImage") {
     val cfgScale: Double by value(7.0)
 
     @ValueName("sampler")
-    @ValueDescription("默认sampler")
+    @ValueDescription("默认采样器")
     val samplerName: String by value("Euler a")
 
     @ValueName("batch_size")
