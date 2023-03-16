@@ -100,6 +100,23 @@ reload-sd
 * `base_url` 基本网址
 * `dns_over_https` DNS
 * `timeout` API超时时间
+* `cool_down_time` API冷却时间
+
+`TextToImage.yml` 以图生图基本配置
+
+* `width` 默认宽度
+* `height` 默认高度
+* `steps` 默认步数
+* `sampler` 默认采样器
+* `detailed_output` 是否以转发方式输出详细信息 默认 false
+
+`ImageToImage.yml` 以图生图基本配置
+
+* `width` 默认宽度
+* `height` 默认高度
+* `steps` 默认步数
+* `sampler` 默认采样器
+* `detailed_output` 是否以转发方式输出详细信息 默认 false
 
 ## 安装
 
