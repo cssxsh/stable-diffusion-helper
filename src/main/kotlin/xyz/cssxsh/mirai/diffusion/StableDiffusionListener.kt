@@ -338,4 +338,32 @@ public object StableDiffusionListener : SimpleListenerHost() {
             subject.sendMessage(message)
         }
     }
+
+    @PublishedApi
+    internal val samplers: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.samplers() {
+        if (toCommandSender().hasPermission(samplers).not()) return
+        val content = message.contentToString()
+        """(?i)^(?:samplers|采样器)""".toRegex().find(content) ?: return
+
+        logger.info("samplers for $sender")
+        val sd = client
+
+        launch {
+            val info = sd.getSamplers()
+            val message = buildString {
+                for (sampler in info) {
+                    appendLine("sampler_name: ${sampler.name}")
+                    appendLine("aliases: ${sampler.aliases}")
+                }
+                ifEmpty {
+                    appendLine("内容为空")
+                }
+            }
+
+            subject.sendMessage(message)
+        }
+    }
 }
