@@ -394,12 +394,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
         }
     }
 
-    @PublishedApi
-    internal val options: Permission by StableDiffusionPermissions
-
     @EventHandler
     public fun MessageEvent.model() {
-        if (toCommandSender().hasPermission(options).not()) return
+        if (toCommandSender().hasPermission(models).not()) return
         val content = message.contentToString()
         val match = """(?i)^(?:model|模型)\s+(.+)""".toRegex().find(content) ?: return
         val (title) = match.destructured
