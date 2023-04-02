@@ -366,4 +366,58 @@ public object StableDiffusionListener : SimpleListenerHost() {
             subject.sendMessage(message)
         }
     }
+
+    @PublishedApi
+    internal val models: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.models() {
+        if (toCommandSender().hasPermission(models).not()) return
+        val content = message.contentToString()
+        """(?i)^(?:models|模型集)""".toRegex().find(content) ?: return
+
+        logger.info("models for $sender")
+        val sd = client
+
+        launch {
+            val info = sd.getSDModels()
+            val message = buildString {
+                for (model in info) {
+                    appendLine(model.modelName)
+                }
+                ifEmpty {
+                    appendLine("内容为空")
+                }
+            }
+
+            subject.sendMessage(message)
+        }
+    }
+
+    @PublishedApi
+    internal val options: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.model() {
+        if (toCommandSender().hasPermission(options).not()) return
+        val content = message.contentToString()
+        val match = """(?i)^(?:model|模型)\s+(.+)""".toRegex().find(content) ?: return
+        val (title) = match.destructured
+
+        logger.info("set model for $sender")
+        val sd = client
+
+        launch {
+            val info = sd.options {
+                put("sd_model_checkpoint", title)
+                put("CLIP_stop_at_last_layers", 2)
+            }
+
+            if (info == JsonNull) {
+                subject.sendMessage("$title 模型已设置")
+            } else {
+                subject.sendMessage(info.toString())
+            }
+        }
+    }
 }

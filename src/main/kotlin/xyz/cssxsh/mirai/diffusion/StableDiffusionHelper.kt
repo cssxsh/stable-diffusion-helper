@@ -27,6 +27,7 @@ public object StableDiffusionHelper : KotlinPlugin(
         StableDiffusionListener.img2img
         StableDiffusionListener.styles
         StableDiffusionListener.samplers
+        StableDiffusionListener.models
         StableDiffusionListener.registerTo(globalEventChannel())
     }
 

@@ -165,9 +165,18 @@ public class StableDiffusionClient(@PublishedApi internal val config: StableDiff
 
     // region Config
 
-    public suspend fun options(info: Any): ProgressResponse {
+    public suspend fun options(): JsonObject {
         return http.get {
             url("/sdapi/v1/options")
+        }.body()
+    }
+
+    public suspend fun options(builder: JsonObjectBuilder.() -> Unit): JsonElement {
+        return http.post {
+            url("/sdapi/v1/options")
+
+            setBody(body = buildJsonObject(builder))
+            contentType(ContentType.Application.Json)
         }.body()
     }
 
