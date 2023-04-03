@@ -368,6 +368,33 @@ public object StableDiffusionListener : SimpleListenerHost() {
     }
 
     @PublishedApi
+    internal val upscalers: Permission by StableDiffusionPermissions
+
+    @EventHandler
+    public fun MessageEvent.upscalers() {
+        if (toCommandSender().hasPermission(upscalers).not()) return
+        val content = message.contentToString()
+        """(?i)^(?:upscalers|升频器)""".toRegex().find(content) ?: return
+
+        logger.info("upscalers for $sender")
+        val sd = client
+
+        launch {
+            val info = sd.getUpScalers()
+            val message = buildString {
+                for (upscaler in info) {
+                    appendLine(upscaler.name)
+                }
+                ifEmpty {
+                    appendLine("内容为空")
+                }
+            }
+
+            subject.sendMessage(message)
+        }
+    }
+
+    @PublishedApi
     internal val models: Permission by StableDiffusionPermissions
 
     @EventHandler
