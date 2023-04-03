@@ -1,7 +1,7 @@
 package xyz.cssxsh.mirai.diffusion.config
 
 import net.mamoe.mirai.console.data.*
-import xyz.cssxsh.diffusion.StableDiffusionTextToImageBuilder
+import xyz.cssxsh.diffusion.*
 
 @PublishedApi
 internal object TextToImageConfig : ReadOnlyPluginConfig("TextToImage") {

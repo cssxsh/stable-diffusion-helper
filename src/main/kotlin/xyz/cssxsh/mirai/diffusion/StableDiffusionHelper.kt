@@ -9,7 +9,7 @@ public object StableDiffusionHelper : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.stable-diffusion-helper",
         name = "stable-diffusion-helper",
-        version = "0.4.0",
+        version = "0.5.0",
     ) {
         author("cssxsh")
     }
