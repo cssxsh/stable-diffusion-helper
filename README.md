@@ -107,8 +107,8 @@ samplers
 
 ### `models`
 
-查看支持的模型
 权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:models`  
+查看支持的模型
 例子:
 ```log
 models 
@@ -116,6 +116,8 @@ models
 ```log
 模型集 
 ```
+切换模型
+例子:
 ```log
 model xxxxx
 ```
