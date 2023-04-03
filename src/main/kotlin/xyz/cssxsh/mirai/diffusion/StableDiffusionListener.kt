@@ -253,7 +253,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
             }
 
             val message = when (ImageToImageConfig.detailedOutput) {
-                true -> buildForwardMessage() {
+                true -> buildForwardMessage {
                     val info = Json.decodeFromString(JsonObject.serializer(), response.info)
 
                     sender says response.images.mapIndexed { index, image ->
@@ -383,7 +383,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
             val info = sd.getSDModels()
             val message = buildString {
                 for (model in info) {
-                    appendLine(model.modelName)
+                    appendLine(model.title)
                 }
                 ifEmpty {
                     appendLine("内容为空")
