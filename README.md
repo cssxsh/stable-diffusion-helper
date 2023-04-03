@@ -93,6 +93,36 @@ reload-sd
 
 支持的参数 基本同 `t2i` 一致
 
+### `samplers`
+
+查看支持的采样器
+权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:samplers`  
+例子:
+```log
+samplers 
+```
+```log
+采样器 
+```
+
+### `models`
+
+查看支持的模型
+权限ID: `xyz.cssxsh.mirai.plugin.stable-diffusion-helper:models`  
+例子:
+```log
+models 
+```
+```log
+模型集 
+```
+```log
+model xxxxx
+```
+```log
+模型 xxxxx
+```
+
 ## 配置
 
 `client.yml` 基本配置

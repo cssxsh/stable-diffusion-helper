@@ -1,3 +1,9 @@
+## 0.4.0 (23/04/03)
+
+1.  feat: regex '\S+\s?\S+'
+2.  feat: samplers
+3.  feat: models and options
+
 ## 0.3.0 (23/03/17)
 
 1.  feat: detailed output
