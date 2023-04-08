@@ -93,7 +93,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-        launch {
+        commandLaunch {
 
             subject.sendMessage(At(sender) + "\n 正在努力绘画，请稍等.")
 
@@ -199,7 +199,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-        launch {
+        commandLaunch {
 
             subject.sendMessage(At(sender) + "\n 正在执行图生图，请稍等.")
 
@@ -444,4 +444,25 @@ public object StableDiffusionListener : SimpleListenerHost() {
             }
         }
     }
+
+    private fun launchByCatching(
+        block: suspend CoroutineScope.() -> Unit,
+        transform: suspend (Throwable) -> Unit
+    ) = launch {
+        runCatching {
+            block(this)
+        }.recoverCatching {
+            transform(it)
+        }
+    }
+
+    private fun MessageEvent.commandLaunch(
+        block: suspend CoroutineScope.() -> Unit
+    ) {
+        launchByCatching(block = block, transform = {
+            subject.sendMessage("在执行指令的过程中发生了额外的错误: \n$it")
+            logger.error(it)
+        })
+    }
+
 }
