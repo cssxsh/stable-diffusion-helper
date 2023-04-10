@@ -339,6 +339,34 @@ public object StableDiffusionListener : SimpleListenerHost() {
         }
     }
 
+    @EventHandler
+    public fun MessageEvent.style() {
+        if (toCommandSender().hasPermission(styles).not()) return
+        val content = message.contentToString()
+        val match = """(?i)^(?:style|风格)\s+(.+)""".toRegex().find(content) ?: return
+        val (name) = match.destructured
+
+        logger.info("query style for $sender")
+        val sd = client
+
+        launch {
+            val style = sd.getPromptStyles().find { it.name == name }
+            val message = buildString {
+                if (style != null) {
+                    appendLine("=== Prompt ===")
+                    appendLine(style.prompt)
+                    appendLine("=== Negative Prompt ===")
+                    appendLine(style.negativePrompt)
+                }
+                ifEmpty {
+                    appendLine("内容为空")
+                }
+            }
+
+            subject.sendMessage(message)
+        }
+    }
+
     @PublishedApi
     internal val samplers: Permission by StableDiffusionPermissions
 
