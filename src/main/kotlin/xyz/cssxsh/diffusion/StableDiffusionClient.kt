@@ -83,22 +83,18 @@ public class StableDiffusionClient(@PublishedApi internal val config: StableDiff
         return generateImageToImage(builder = builder)
     }
 
-    public suspend fun extraSingleImage(info: Any): ProgressResponse {
+    public suspend fun extraBatchImage(builder: StableDiffusionExtraBatchImageBuilder): ExtraBatchImageResponse {
         return http.post {
-            url("/sdapi/v1/extra-single-image")
+            url("/sdapi/v1/extra-batch-images")
 
-            setBody(body = info)
+            setBody(body = builder.build())
             contentType(ContentType.Application.Json)
         }.body()
     }
 
-    public suspend fun extraBatchImage(info: Any): ProgressResponse {
-        return http.post {
-            url("/sdapi/v1/extra-batch-images")
-
-            setBody(body = info)
-            contentType(ContentType.Application.Json)
-        }.body()
+    public suspend inline fun extraBatchImage(block: StableDiffusionExtraBatchImageBuilder.() -> Unit): ExtraBatchImageResponse {
+        val builder = StableDiffusionExtraBatchImageBuilder().apply(block)
+        return extraBatchImage(builder = builder)
     }
 
     // endregion
