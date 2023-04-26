@@ -200,7 +200,7 @@ public class StableDiffusionImageToImageBuilder {
      */
     @StableDiffusionDSL
     public fun base64(file: File): String {
-        val type = when (val extension = file.extension) {
+        val type = when (val extension = file.extension.lowercase()) {
             "jpg" -> "jpeg"
             else -> extension
         }
@@ -233,7 +233,8 @@ public class StableDiffusionImageToImageBuilder {
     @StableDiffusionDSL
     public var maskBlur: Int = 4
 
-    public val raw: MutableMap<String, JsonElement> = HashMap()
+    @PublishedApi
+    internal val raw: MutableMap<String, JsonElement> = HashMap()
 
     @PublishedApi
     internal fun JsonObjectBuilder.push() {

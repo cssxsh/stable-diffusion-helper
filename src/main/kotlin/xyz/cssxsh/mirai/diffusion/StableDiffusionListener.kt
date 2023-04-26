@@ -220,14 +220,8 @@ public object StableDiffusionListener : SimpleListenerHost() {
                 seed = seed1
 
                 images {
-                    for ((image, file) in images) {
-                        val type = when (image.imageType) {
-                            ImageType.PNG, ImageType.APNG -> "png"
-                            ImageType.BMP -> "bmp"
-                            ImageType.JPG -> "jpeg"
-                            ImageType.GIF, ImageType.UNKNOWN -> "gif"
-                        }
-                        add("data:image/${type};base64,${file.readBytes().encodeBase64()}")
+                    for ((_, file) in images) {
+                        addBase64(file)
                     }
                 }
 
@@ -306,6 +300,81 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     subject.uploadImage(temp)
                 }.toMessageChain()
             }
+
+            subject.sendMessage(message)
+            subject.sendMessage(At(sender))
+        }
+    }
+
+    @EventHandler
+    public fun MessageEvent.extra() {
+        if (toCommandSender().hasPermission(img2img).not()) return
+        val content = message.findIsInstance<PlainText>()?.content ?: return
+        """(?i)^extra""".toRegex().find(content) ?: return
+        val config = content.substringAfter('\n', "").ifEmpty { return }
+
+        logger.info("extra for $sender")
+        val sd = client
+        val out = dataFolder
+
+        launch {
+
+            subject.sendMessage(At(sender) + "\n 正在执行附加功能，请稍等.")
+
+            mutex.withLock {
+                val interval = System.currentTimeMillis() - last
+                delay(StableDiffusionConfig.cd - interval)
+                last = System.currentTimeMillis()
+            }
+
+            val images = message.filterIsInstance<Image>().associateWith { image ->
+                ImageFileHolder.load(image)
+            }
+
+            val response = sd.extraBatchImage {
+
+                images {
+                    for ((_, file) in images) {
+                        addBase64(file)
+                    }
+                }
+
+                """(\S+)=(".+?"|\S+)""".toRegex().findAll(config).forEach { match ->
+                    val (key, value) = match.destructured
+                    val primitive = when {
+                        value.toLongOrNull() != null -> JsonPrimitive(value.toLong())
+                        value.toDoubleOrNull() != null -> JsonPrimitive(value.toDouble())
+                        value.toBooleanStrictOrNull() != null -> JsonPrimitive(value.toBoolean())
+                        else -> JsonPrimitive(value.removeSurrounding("\""))
+                    }
+                    val target = when(key) {
+                        "1" -> "upscaler_1"
+                        "2" -> "upscaler_2"
+                        "3" -> "extras_upscaler_2_visibility"
+                        "4" -> "gfpgan_visibility"
+                        "5" -> "codeformer_visibility"
+                        "6" -> "codeformer_weight"
+                        "mode" -> "resize_mode"
+                        "resize" -> "upscaling_resize"
+                        "width" -> "upscaling_resize_w"
+                        "height" -> "upscaling_resize_h"
+                        "crop" -> "upscaling_resize_h"
+                        "GFPGAN" -> "gfpgan_visibility"
+                        else -> key
+                    }
+                    raw[target] = primitive
+                }
+                if (raw.isEmpty().not()) logger.info("extra for $sender with ${JsonObject(raw)}")
+            }
+
+            val message = response.images.mapIndexed { index, image ->
+                val temp =
+                    out.resolve("${LocalDate.now()}/${0}.${response.hashCode().toHexString()}.${index}.png")
+                temp.parentFile.mkdirs()
+                temp.writeBytes(image.decodeBase64Bytes())
+
+                subject.uploadImage(temp)
+            }.toMessageChain()
 
             subject.sendMessage(message)
             subject.sendMessage(At(sender))

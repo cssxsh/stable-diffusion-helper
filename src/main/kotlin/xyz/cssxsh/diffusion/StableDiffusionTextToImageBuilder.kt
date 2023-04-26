@@ -217,7 +217,8 @@ public class StableDiffusionTextToImageBuilder {
 
     // endregion
 
-    public val raw: MutableMap<String, JsonElement> = HashMap()
+    @PublishedApi
+    internal val raw: MutableMap<String, JsonElement> = HashMap()
 
     @PublishedApi
     internal fun JsonObjectBuilder.push() {
