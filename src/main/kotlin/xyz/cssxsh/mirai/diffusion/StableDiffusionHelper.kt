@@ -9,7 +9,7 @@ public object StableDiffusionHelper : KotlinPlugin(
     JvmPluginDescription(
         id = "xyz.cssxsh.mirai.plugin.stable-diffusion-helper",
         name = "stable-diffusion-helper",
-        version = "0.5.0",
+        version = "0.6.0",
     ) {
         author("cssxsh")
     }
@@ -27,6 +27,7 @@ public object StableDiffusionHelper : KotlinPlugin(
         StableDiffusionListener.img2img
         StableDiffusionListener.styles
         StableDiffusionListener.samplers
+        StableDiffusionListener.upscalers
         StableDiffusionListener.models
         StableDiffusionListener.registerTo(globalEventChannel())
     }

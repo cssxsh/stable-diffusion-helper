@@ -75,6 +75,9 @@ public object StableDiffusionListener : SimpleListenerHost() {
             logger.info("config reloaded")
             client = StableDiffusionClient(config = StableDiffusionConfig)
         }
+        launch {
+            subject.sendMessage("配置已重载")
+        }
     }
 
     @PublishedApi
@@ -95,7 +98,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
         launch(CoroutineName("txt2img")) {
 
-            subject.sendMessage(At(sender) + "\n 正在努力绘画，请稍等.")
+            subject.sendMessage("正在努力绘画，请稍等...")
 
             mutex.withLock {
                 val interval = System.currentTimeMillis() - last
@@ -122,7 +125,13 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         value.toBooleanStrictOrNull() != null -> JsonPrimitive(value.toBoolean())
                         else -> JsonPrimitive(value.removeSurrounding("\""))
                     }
-                    raw[key] = primitive
+                    val target = when(key) {
+                        "sampler" -> "sampler_name"
+                        "count" -> "n_iter"
+                        "hr" -> "enable_hr"
+                        else -> key
+                    }
+                    raw[target] = primitive
 
                     ""
                 }
@@ -167,7 +176,6 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         appendLine(info["negative_prompt"]?.jsonPrimitive?.content)
                     }
                 }
-
                 false -> response.images.mapIndexed { index, image ->
                     val temp =
                         out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
@@ -201,7 +209,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
         launch(CoroutineName("img2img")) {
 
-            subject.sendMessage(At(sender) + "\n 正在执行图生图，请稍等.")
+            subject.sendMessage("正在执行图生图，请稍等...")
 
             mutex.withLock {
                 val interval = System.currentTimeMillis() - last
@@ -238,7 +246,13 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         value.toBooleanStrictOrNull() != null -> JsonPrimitive(value.toBoolean())
                         else -> JsonPrimitive(value.removeSurrounding("\""))
                     }
-                    raw[key] = primitive
+                    val target = when(key) {
+                        "sampler" -> "sampler_name"
+                        "count" -> "n_iter"
+                        "hr" -> "enable_hr"
+                        else -> key
+                    }
+                    raw[target] = primitive
 
                     ""
                 }
@@ -290,7 +304,6 @@ public object StableDiffusionListener : SimpleListenerHost() {
                     }
 
                 }
-
                 false -> response.images.mapIndexed { index, image ->
                     val temp =
                         out.resolve("${LocalDate.now()}/${seed1}.${response.hashCode().toHexString()}.${index}.png")
@@ -319,7 +332,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
         launch(CoroutineName("extra")) {
 
-            subject.sendMessage(At(sender) + "\n 正在执行附加功能，请稍等.")
+            subject.sendMessage("正在执行附加功能，请稍等...")
 
             mutex.withLock {
                 val interval = System.currentTimeMillis() - last
@@ -358,7 +371,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         "resize" -> "upscaling_resize"
                         "width" -> "upscaling_resize_w"
                         "height" -> "upscaling_resize_h"
-                        "crop" -> "upscaling_resize_h"
+                        "crop" -> "upscaling_crop"
                         "GFPGAN" -> "gfpgan_visibility"
                         else -> key
                     }

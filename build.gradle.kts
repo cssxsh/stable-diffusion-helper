@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "xyz.cssxsh"
-version = "0.5.0"
+version = "0.6.0"
 
 mavenCentralPublish {
     useCentralS01()
@@ -28,6 +28,7 @@ dependencies {
     testImplementation(kotlin("test"))
     //
     implementation(platform("net.mamoe:mirai-bom:2.14.0"))
+    testImplementation("net.mamoe:mirai-core-mock")
     testImplementation("net.mamoe:mirai-logging-slf4j")
     //
     implementation(platform("io.ktor:ktor-bom:2.1.3"))
