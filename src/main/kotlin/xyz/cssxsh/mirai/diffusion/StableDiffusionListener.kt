@@ -129,6 +129,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         "sampler" -> "sampler_name"
                         "count" -> "n_iter"
                         "hr" -> "enable_hr"
+                        "negative" -> "negative_prompt"
                         else -> key
                     }
                     raw[target] = primitive
@@ -250,6 +251,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
                         "sampler" -> "sampler_name"
                         "count" -> "n_iter"
                         "hr" -> "enable_hr"
+                        "negative" -> "negative_prompt"
                         else -> key
                     }
                     raw[target] = primitive

@@ -52,7 +52,11 @@ hr -> enable_hr
 ```
 
 关于 `Negative Prompt`, 由于他和 `Prompt` 一样是分组多词汇的，同时对他们进行支持很麻烦  
-所以如果你要用到 `Negative Prompt`, 建议在 `Styles` 加入常用的词组，然后使用 `#xxx` 调用
+所以如果你要用到 `Negative Prompt`, 建议在 `Styles` 加入常用的词组，然后使用 `#xxx` 调用  
+如果你真的要使用, 请安装入下格式  
+```
+negative_prompt="..."
+```
 
 ### `i2i`
 
