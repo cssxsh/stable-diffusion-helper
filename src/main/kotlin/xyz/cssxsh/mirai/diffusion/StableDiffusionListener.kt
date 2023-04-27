@@ -58,7 +58,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
 
     override fun handleException(context: CoroutineContext, exception: Throwable) {
         val cause = exception.cause as? StableDiffusionApiException ?: exception
-        logger.warning(cause)
+        logger.warning(context[CoroutineName]?.name, cause)
     }
 
     @PublishedApi
@@ -93,7 +93,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-        launch {
+        launch(CoroutineName("txt2img")) {
 
             subject.sendMessage(At(sender) + "\n 正在努力绘画，请稍等.")
 
@@ -199,7 +199,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-        launch {
+        launch(CoroutineName("img2img")) {
 
             subject.sendMessage(At(sender) + "\n 正在执行图生图，请稍等.")
 
@@ -317,7 +317,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         val sd = client
         val out = dataFolder
 
-        launch {
+        launch(CoroutineName("extra")) {
 
             subject.sendMessage(At(sender) + "\n 正在执行附加功能，请稍等.")
 
@@ -393,7 +393,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("styles for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("styles")) {
             val info = sd.getPromptStyles()
             val message = buildString {
                 for (style in info) {
@@ -418,7 +418,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("query style for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("style")) {
             val style = sd.getPromptStyles().find { it.name == name }
             val message = buildString {
                 if (style != null) {
@@ -448,7 +448,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("samplers for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("samplers")) {
             val info = sd.getSamplers()
             val message = buildString {
                 for (sampler in info) {
@@ -476,7 +476,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("upscalers for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("upscalers")) {
             val info = sd.getUpScalers()
             val message = buildString {
                 for (upscaler in info) {
@@ -503,7 +503,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("models for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("models")) {
             val info = sd.getSDModels()
             val message = buildString {
                 for (model in info) {
@@ -528,7 +528,7 @@ public object StableDiffusionListener : SimpleListenerHost() {
         logger.info("set model for $sender")
         val sd = client
 
-        launch {
+        launch(CoroutineName("model")) {
             val info = sd.options {
                 put("sd_model_checkpoint", title)
                 put("CLIP_stop_at_last_layers", 2)
